@@ -8,6 +8,11 @@
 const WIDTH = 7;
 const HEIGHT = 6;
 
+const wins = {
+  player1: 0,
+  player2: 0,
+};
+
 let board = makeBoard();
 
 let currPlayer = 1; // active player: 1 or 2
@@ -70,9 +75,12 @@ function placeInTable(y, x) {
   cell.append(piece);
 }
 
-/** endGame: announce game end */
+/** endGame: announce game end and turn off event listener */
 
 function endGame(msg) {
+  document
+    .querySelector("#column-top")
+    .removeEventListener("click", handleClick);
   alert(msg);
 }
 
@@ -95,6 +103,7 @@ function handleClick(evt) {
 
   // check for win
   if (checkForWin()) {
+    updateScore(currPlayer);
     return endGame(`Player ${currPlayer} won!`);
   }
 
@@ -113,6 +122,15 @@ function handleClick(evt) {
   } else {
     currPlayer = 1;
   }
+}
+
+/** updateScore(player): add one to winning player's score */
+
+function updateScore(player) {
+  wins[`player${player}`]++;
+  document.querySelector(
+    `#player-${player}-score`
+  ).innerText = `Player ${player} Wins: ${wins["player" + player]}`;
 }
 
 /** checkForWin: check board cell-by-cell for "does a win start here?" */
