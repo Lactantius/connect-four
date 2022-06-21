@@ -194,6 +194,7 @@ function checkForWin() {
 document.querySelector("button").addEventListener("click", function () {
   clearHtmlBoard();
   board = makeBoard();
+  currPlayer = 1;
 });
 
 function clearHtmlBoard() {
