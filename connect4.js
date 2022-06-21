@@ -108,13 +108,9 @@ function handleClick(evt) {
   }
 
   // check for tie
-  freeColumns = [];
-  for (let c = 0; c < WIDTH; c++) {
-    freeColumns.push(findSpotForCol(c));
+  if (checkForTie()) {
+    return endGame(`You tied!`);
   }
-  freeColumns.forEach((column) => {
-    if (column) return true;
-  });
 
   // switch players
   if (currPlayer === 1) {
@@ -122,6 +118,12 @@ function handleClick(evt) {
   } else {
     currPlayer = 1;
   }
+}
+
+/** checkForTie checks if the board is full */
+
+function checkForTie() {
+  return board.every((row) => row.every((cell) => cell));
 }
 
 /** updateScore(player): add one to winning player's score */
