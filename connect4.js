@@ -37,7 +37,6 @@ function makeHtmlBoard() {
     headCell.setAttribute("id", x);
     top.append(headCell);
   }
-  htmlBoard.append(top);
 
   // Make other rows
   for (let y = 0; y < HEIGHT; y++) {
@@ -47,15 +46,16 @@ function makeHtmlBoard() {
       cell.setAttribute("id", `${y}-${x}`);
       row.append(cell);
     }
-    htmlBoard.append(row);
+    htmlBoard.prepend(row);
   }
+
+  htmlBoard.prepend(top);
 }
 
 /** findSpotForCol: given column x, return top empty y (null if filled) */
 
 function findSpotForCol(x) {
   for (let y = 0; y < HEIGHT; y++) {
-    console.log(y);
     if (!board[y][x]) return y;
   }
   return null;
@@ -64,13 +64,16 @@ function findSpotForCol(x) {
 /** placeInTable: update DOM to place piece into HTML table of board */
 
 function placeInTable(y, x) {
-  // TODO: make a div and insert into correct table cell
+  const cell = document.getElementById(`${y}-${x}`);
+  const piece = document.createElement("div");
+  piece.classList.add("piece", `player-${currPlayer}`);
+  cell.append(piece);
 }
 
 /** endGame: announce game end */
 
 function endGame(msg) {
-  // TODO: pop up alert message
+  alert(msg);
 }
 
 /** handleClick: handle click of column top to play piece */
@@ -81,6 +84,7 @@ function handleClick(evt) {
 
   // get next spot in column (if none, ignore click)
   const y = findSpotForCol(x);
+  console.log(y);
   if (y === null) {
     return;
   }
@@ -95,10 +99,20 @@ function handleClick(evt) {
   }
 
   // check for tie
-  // TODO: check if all cells in board are filled; if so call, call endGame
+  freeColumns = [];
+  for (let c = 0; c < WIDTH; c++) {
+    freeColumns.push(findSpotForCol(c));
+  }
+  freeColumns.forEach((column) => {
+    if (column) return true;
+  });
 
   // switch players
-  currPlayer === 1 ? (currPlayer = 2) : (currPlayer = 1);
+  if (currPlayer === 1) {
+    currPlayer = 2;
+  } else {
+    currPlayer = 1;
+  }
 }
 
 /** checkForWin: check board cell-by-cell for "does a win start here?" */
@@ -119,29 +133,32 @@ function checkForWin() {
     );
   }
 
-  // TODO: read and understand this code. Add comments to help you.
-
-  for (var y = 0; y < HEIGHT; y++) {
-    for (var x = 0; x < WIDTH; x++) {
-      var horiz = [
+  // For every coordinate, make four arrays of four coordinates
+  for (let y = 0; y < HEIGHT; y++) {
+    for (let x = 0; x < WIDTH; x++) {
+      // Original coordinate + 3 to the right
+      let horiz = [
         [y, x],
         [y, x + 1],
         [y, x + 2],
         [y, x + 3],
       ];
-      var vert = [
+      // Original coordinate + 3 below
+      let vert = [
         [y, x],
         [y + 1, x],
         [y + 2, x],
         [y + 3, x],
       ];
-      var diagDR = [
+      // Original coordinate + diagonal up right
+      let diagDR = [
         [y, x],
         [y + 1, x + 1],
         [y + 2, x + 2],
         [y + 3, x + 3],
       ];
-      var diagDL = [
+      // Original coordinate + diagonal up left
+      let diagDL = [
         [y, x],
         [y + 1, x - 1],
         [y + 2, x - 2],
@@ -153,6 +170,17 @@ function checkForWin() {
       }
     }
   }
+}
+
+// New Game button
+document.querySelector("button").addEventListener("click", function () {
+  clearHtmlBoard();
+  board = makeBoard();
+});
+
+function clearHtmlBoard() {
+  document.querySelector("#board").replaceChildren("");
+  makeHtmlBoard();
 }
 
 makeHtmlBoard();

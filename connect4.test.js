@@ -52,4 +52,9 @@ describe("handleClick(evt) updates board properly", function () {
     expect(currPlayer).toEqual(player);
     expect(board).toEqual(fullColBoard);
   });
+  afterEach(function () {
+    board = makeBoard();
+    currPlayer = 1;
+    clearHtmlBoard();
+  });
 });
