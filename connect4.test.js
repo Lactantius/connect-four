@@ -24,7 +24,7 @@ describe("Board is generated", function () {
 describe("handleClick(evt) updates board properly", function () {
   beforeEach(function () {
     //gameState.board = makeBoard(7, 6);
-    gameState.currPlayer = 1;
+    gameState.currentPlayer = 1;
   });
   it("should replace null values with player numbers", function () {
     gameState.board = makeBoard(7, 6);
@@ -76,10 +76,10 @@ describe("placeInHtmlBoard(y, x, gameState) changes values on the board", functi
 describe("findSpotForCol(x, boardHeight, gameState) returns first empty space on board", function () {
   it("should return 0 if column is empty", function () {
     gameState.board = makeBoard(7, 6);
-    expect(findSpotForCol(2, 6, gameState)).toEqual(0);
+    expect(findSpotForCol(2, 6, gameState.board)).toEqual(0);
   });
   it("should return null if column is full", function () {
     gameState.board = fullColBoard;
-    expect(findSpotForCol(0, 6, gameState)).toEqual(null);
+    expect(findSpotForCol(0, 6, gameState.board)).toEqual(null);
   });
 });

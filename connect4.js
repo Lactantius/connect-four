@@ -35,9 +35,10 @@ function makeHtmlBoard(width, height) {
   // Make top row of the game board
   const top = document.createElement("tr");
   top.setAttribute("id", "column-top");
-  top.addEventListener("click", function (evt) {
-    handleClick(evt, gameState);
-  });
+  // top.addEventListener("click", function (evt) {
+  //   handleClick(evt, gameState);
+  // });
+  top.addEventListener("click", handleClick.bind(null, gameState));
 
   // Make cells for the top row
   for (let x = 0; x < width; x++) {
@@ -62,9 +63,9 @@ function makeHtmlBoard(width, height) {
 
 /** findSpotForCol: given column x, return top empty y (null if filled) */
 
-function findSpotForCol(x, boardHeight, gameState) {
+function findSpotForCol(x, boardHeight, boardState) {
   for (let y = 0; y < boardHeight; y++) {
-    if (!gameState.board[y][x]) return y;
+    if (!boardState[y][x]) return y;
   }
   return null;
 }
@@ -84,45 +85,52 @@ function placeInLogicalBoard(y, x, gameState) {
 
 /** endGame: announce game end and turn off event listener */
 
+const overlay = document.getElementById("end-game-overlay");
+overlay.addEventListener("click", function () {
+  overlay.style.display = "none";
+});
+
 function endGame(msg) {
-  document.querySelector("#column-top");
-  // .removeEventListener("click", handleClick);
-  alert(msg);
+  overlay.style.display = "grid";
+  overlay.style.justifyContent = "center";
+  overlay.style.alignContent = "center";
+  overlay.querySelector("span").innerText = msg;
+  // alert(msg);
   gameState.finished = true;
 }
 
 /** handleClick: handle click of column top to play piece */
 
-function handleClick(evt, gameState) {
-  if (gameState.finished) return;
-  const height = gameState.board.length;
+function handleClick(state, evt) {
+  if (state.finished) return;
+  const height = state.board.length;
 
   // get x from ID of clicked cell
   const x = Number(evt.target.id);
 
   // get next spot in column (if none, ignore click)
-  const y = findSpotForCol(x, height, gameState);
+  const y = findSpotForCol(x, height, state.board);
   if (y === null) {
     return;
   }
 
   // place piece in board and add to HTML table
-  placeInLogicalBoard(y, x, gameState);
-  placeInHtmlBoard(y, x, gameState);
+  placeInLogicalBoard(y, x, state);
+  placeInHtmlBoard(y, x, state);
 
   // check for win
-  if (checkForWin(gameState)) {
-    updateScore(gameState.currentPlayer);
-    return endGame(`Player ${gameState.currentPlayer} won!`);
+  if (checkForWin(state)) {
+    updateScore(state.currentPlayer);
+    return endGame(`Player ${state.currentPlayer} won!`);
   }
 
   // check for tie
-  if (checkForTie(gameState)) {
+  if (checkForTie(state)) {
     return endGame(`You tied!`);
   }
 
   // switch players
-  gameState.currentPlayer = gameState.currentPlayer === 1 ? 2 : 1;
+  state.currentPlayer = state.currentPlayer === 1 ? 2 : 1;
 }
 
 /** checkForTie checks if the board is full */
