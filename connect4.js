@@ -19,11 +19,6 @@ const wins = {
   player2: 0,
 };
 
-let board = makeBoard(WIDTH, HEIGHT);
-
-let currPlayer = 1; // active player: 1 or 2
-// const board = []; // array of rows, each row is array of cells  (board[y][x])
-
 /** makeBoard: create in-JS board structure:
  *    board = array of rows, each row is array of cells  (board[y][x])
  */
@@ -74,13 +69,17 @@ function findSpotForCol(x, boardHeight, gameState) {
   return null;
 }
 
-/** placeInTable: update DOM to place piece into HTML table of board */
+/** placeInHtmlBoard: update DOM to place piece into HTML table of board */
 
-function placeInTable(y, x, gameState) {
+function placeInHtmlBoard(y, x, gameState) {
   const cell = document.getElementById(`${y}-${x}`);
   const piece = document.createElement("div");
   piece.classList.add("piece", `player-${gameState.currentPlayer}`);
   cell.append(piece);
+}
+
+function placeInLogicalBoard(y, x, gameState) {
+  gameState.board[y][x] = gameState.currentPlayer;
 }
 
 /** endGame: announce game end and turn off event listener */
@@ -97,10 +96,9 @@ function endGame(msg) {
 function handleClick(evt, gameState) {
   if (gameState.finished) return;
   const height = gameState.board.length;
-  const width = gameState.board[0].length;
 
   // get x from ID of clicked cell
-  const x = +evt.target.id;
+  const x = Number(evt.target.id);
 
   // get next spot in column (if none, ignore click)
   const y = findSpotForCol(x, height, gameState);
@@ -109,8 +107,8 @@ function handleClick(evt, gameState) {
   }
 
   // place piece in board and add to HTML table
-  placeInTable(y, x, gameState);
-  gameState.board[y][x] = gameState.currentPlayer;
+  placeInLogicalBoard(y, x, gameState);
+  placeInHtmlBoard(y, x, gameState);
 
   // check for win
   if (checkForWin(gameState)) {

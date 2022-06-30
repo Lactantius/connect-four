@@ -1,3 +1,12 @@
+const fullColBoard = [
+  [1, null, null, null, null, null, null],
+  [2, null, null, null, null, null, null],
+  [1, null, null, null, null, null, null],
+  [2, null, null, null, null, null, null],
+  [1, null, null, null, null, null, null],
+  [2, null, null, null, null, null, null],
+];
+
 describe("Board is generated", function () {
   it("should make an arry of arrays, with all elements null", function () {
     const testBoard = [
@@ -8,16 +17,17 @@ describe("Board is generated", function () {
       [null, null, null, null, null, null, null],
       [null, null, null, null, null, null, null],
     ];
-    expect(makeBoard()).toEqual(testBoard);
+    expect(makeBoard(7, 6)).toEqual(testBoard);
   });
 });
 
 describe("handleClick(evt) updates board properly", function () {
   beforeEach(function () {
-    board = makeBoard();
-    currPlayer = 1;
+    //gameState.board = makeBoard(7, 6);
+    gameState.currPlayer = 1;
   });
   it("should replace null values with player numbers", function () {
+    gameState.board = makeBoard(7, 6);
     const updatedBoard = [
       [1, 2, null, null, null, null, null],
       [1, null, null, null, null, null, null],
@@ -30,31 +40,46 @@ describe("handleClick(evt) updates board properly", function () {
     document.getElementById(0).click();
     document.getElementById(1).click();
     document.getElementById(0).click();
-    expect(board).toEqual(updatedBoard);
+    expect(gameState.board).toEqual(updatedBoard);
+    // After
+    clearHtmlBoard();
+    gameState.board = makeBoard(7, 6);
   });
 
   it("should reject clicks that won't fit on the board", function () {
-    const fullColBoard = [
-      [1, null, null, null, null, null, null],
-      [2, null, null, null, null, null, null],
-      [1, null, null, null, null, null, null],
-      [2, null, null, null, null, null, null],
-      [1, null, null, null, null, null, null],
-      [2, null, null, null, null, null, null],
-    ];
+    gameState.currentPlayer = 1;
+    gameState.board = makeBoard(7, 6);
 
-    for (let y = 0; y < HEIGHT; y++) {
+    for (let y = 0; y < 6; y++) {
       document.getElementById(0).click();
+      console.log(gameState.board);
     }
 
-    const player = currPlayer;
     document.getElementById(0).click();
-    expect(currPlayer).toEqual(player);
-    expect(board).toEqual(fullColBoard);
+    console.log(gameState.board[0]);
+    expect(gameState.currentPlayer).toEqual(1);
+    expect(gameState.board).toEqual(fullColBoard);
   });
-  afterEach(function () {
-    board = makeBoard();
-    currPlayer = 1;
+});
+
+describe("placeInHtmlBoard(y, x, gameState) changes values on the board", function () {
+  it("should add player token", function () {
+    gameState.currentPlayer = 1;
     clearHtmlBoard();
+    placeInHtmlBoard(3, 4, gameState);
+    expect(document.getElementById("3-4").children[0].className).toEqual(
+      "piece player-1"
+    );
+  });
+});
+
+describe("findSpotForCol(x, boardHeight, gameState) returns first empty space on board", function () {
+  it("should return 0 if column is empty", function () {
+    gameState.board = makeBoard(7, 6);
+    expect(findSpotForCol(2, 6, gameState)).toEqual(0);
+  });
+  it("should return null if column is full", function () {
+    gameState.board = fullColBoard;
+    expect(findSpotForCol(0, 6, gameState)).toEqual(null);
   });
 });
