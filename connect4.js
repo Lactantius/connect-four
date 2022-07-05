@@ -8,7 +8,7 @@
 const WIDTH = 7;
 const HEIGHT = 6;
 
-const gameState = {
+let gameState = {
   board: makeBoard(WIDTH, HEIGHT),
   currentPlayer: 1,
   finished: false,
@@ -35,10 +35,8 @@ function makeHtmlBoard(width, height) {
   // Make top row of the game board
   const top = document.createElement("tr");
   top.setAttribute("id", "column-top");
-  // top.addEventListener("click", function (evt) {
-  //   handleClick(evt, gameState);
-  // });
-  top.addEventListener("click", handleClick.bind(null, gameState));
+  // top.addEventListener("click", handleClick.bind(null, gameState));
+  top.addEventListener("click", (evt) => handleClick(evt));
 
   // Make cells for the top row
   for (let x = 0; x < width; x++) {
@@ -72,15 +70,15 @@ function findSpotForCol(x, boardHeight, boardState) {
 
 /** placeInHtmlBoard: update DOM to place piece into HTML table of board */
 
-function placeInHtmlBoard(y, x, gameState) {
+function placeInHtmlBoard(y, x, player) {
   const cell = document.getElementById(`${y}-${x}`);
   const piece = document.createElement("div");
-  piece.classList.add("piece", `player-${gameState.currentPlayer}`);
+  piece.classList.add("piece", `player-${player}`);
   cell.append(piece);
 }
 
-function placeInLogicalBoard(y, x, gameState) {
-  gameState.board[y][x] = gameState.currentPlayer;
+function placeInLogicalBoard(y, x, board, player) {
+  board[y][x] = player;
 }
 
 /** endGame: announce game end and turn off event listener */
@@ -101,42 +99,48 @@ function endGame(msg) {
 
 /** handleClick: handle click of column top to play piece */
 
-function handleClick(state, evt) {
-  if (state.finished) return;
-  const height = state.board.length;
+function handleClick(evt) {
+  if (gameState.finished) return;
+  const boardState = gameState.board.map((row) => row.slice());
+  const currentPlayer = gameState.currentPlayer;
+  const height = boardState.length;
 
   // get x from ID of clicked cell
   const x = Number(evt.target.id);
 
   // get next spot in column (if none, ignore click)
-  const y = findSpotForCol(x, height, state.board);
+  const y = findSpotForCol(x, height, boardState);
   if (y === null) {
     return;
   }
 
   // place piece in board and add to HTML table
-  placeInLogicalBoard(y, x, state);
-  placeInHtmlBoard(y, x, state);
+  placeInLogicalBoard(y, x, boardState, currentPlayer);
+  placeInHtmlBoard(y, x, currentPlayer);
 
   // check for win
-  if (checkForWin(state)) {
-    updateScore(state.currentPlayer);
-    return endGame(`Player ${state.currentPlayer} won!`);
+  if (checkForWin(boardState, currentPlayer)) {
+    updateScore(currentPlayer);
+    return endGame(`Player ${currentPlayer} won!`);
   }
 
   // check for tie
-  if (checkForTie(state)) {
+  if (checkForTie(boardState)) {
     return endGame(`You tied!`);
   }
 
-  // switch players
-  state.currentPlayer = state.currentPlayer === 1 ? 2 : 1;
+  // Update state
+  gameState = {
+    board: boardState.map((row) => row.slice()),
+    currentPlayer: currentPlayer === 1 ? 2 : 1,
+    finished: false,
+  };
 }
 
 /** checkForTie checks if the board is full */
 
-function checkForTie(gameState) {
-  return gameState.board.every((row) => row.every((cell) => cell));
+function checkForTie(board) {
+  return board.every((row) => row.every((cell) => cell));
 }
 
 /** updateScore(player): add one to winning player's score */
@@ -150,22 +154,18 @@ function updateScore(player) {
 
 /** checkForWin: check board cell-by-cell for "does a win start here?" */
 
-function checkForWin(gameState) {
-  const height = gameState.board.length;
-  const width = gameState.board[0].length;
+function checkForWin(board, player) {
+  const height = board.length;
+  const width = board[0].length;
 
-  function _win(cells, gameState) {
+  function _win(cells, board) {
     // Check four cells to see if they're all color of current player
     //  - cells: list of four (y, x) cells
     //  - returns true if all are legal coordinates & all match currPlayer
 
     return cells.every(
       ([y, x]) =>
-        y >= 0 &&
-        y < height &&
-        x >= 0 &&
-        x < width &&
-        gameState.board[y][x] === gameState.currentPlayer
+        y >= 0 && y < height && x >= 0 && x < width && board[y][x] === player
     );
   }
 
@@ -202,10 +202,10 @@ function checkForWin(gameState) {
       ];
 
       if (
-        _win(horiz, gameState) ||
-        _win(vert, gameState) ||
-        _win(diagDR, gameState) ||
-        _win(diagDL, gameState)
+        _win(horiz, board, player) ||
+        _win(vert, board, player) ||
+        _win(diagDR, board, player) ||
+        _win(diagDL, board, player)
       ) {
         return true;
       }

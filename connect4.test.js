@@ -23,7 +23,7 @@ describe("Board is generated", function () {
 
 describe("handleClick(evt) updates board properly", function () {
   beforeEach(function () {
-    //gameState.board = makeBoard(7, 6);
+    gameState.board = makeBoard(7, 6);
     gameState.currentPlayer = 1;
   });
   it("should replace null values with player numbers", function () {
@@ -62,11 +62,11 @@ describe("handleClick(evt) updates board properly", function () {
   });
 });
 
-describe("placeInHtmlBoard(y, x, gameState) changes values on the board", function () {
+describe("placeInHtmlBoard(y, x, player) changes values on the board", function () {
   it("should add player token", function () {
-    gameState.currentPlayer = 1;
+    const player = 1;
     clearHtmlBoard();
-    placeInHtmlBoard(3, 4, gameState);
+    placeInHtmlBoard(3, 4, player);
     expect(document.getElementById("3-4").children[0].className).toEqual(
       "piece player-1"
     );
